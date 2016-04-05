@@ -65,6 +65,8 @@ tg.on('message', function(msg) {
 });
 
 var sendTg = function(msg) {
+    console.log('Sending to Telegram: ' + msg);
+
     tgChats.forEach(function(chatId) {
         tg.sendMessage(chatId, msg, {
             disable_web_page_preview: true,
@@ -89,33 +91,29 @@ github.on('push:' + config.git.reponame, function(ref, data) {
         s += ': "' + data.commits[0].message + '"';
     }
 
-    console.log(s);
-    console.log('url: ' + data.compare);
-
     sendTg(s);
 });
 
 github.on('pull_request:' + config.git.reponame, function(ref, data) {
-    console.log(data);
-
-    var s = 'Pull request #';
+    var s = '[Pull request #';
 
     s += data.number;
+    s += '](' + data.pull_request.html_url + ')';
+
     s += ' (' + data.pull_request.title + ')';
 
     s += ' ' + data.action;
     s += ' by ' + data.sender.login;
 
-    console.log(s);
-    console.log('url: ' + data.pull_request.html_url);
-
     sendTg(s);
 });
 
 github.on('issues:' + config.git.reponame, function(ref, data) {
-    var s = 'Issue #';
+    var s = '[Issue #';
 
     s += data.issue.number;
+    s += '](' + data.issue.html_url + ')';
+
     s += ' (' + data.issue.title + ')';
     s += ' ' + data.action;
 
@@ -127,21 +125,19 @@ github.on('issues:' + config.git.reponame, function(ref, data) {
 
     s += ' by ' + data.sender.login;
 
-    console.log(s);
-    console.log('url: ' + data.issue.html_url);
-
     sendTg(s);
 });
 
 github.on('issue_comment:' + config.git.reponame, function(ref, data) {
-    var s = data.sender.login + ' commented on #';
+    var s = data.sender.login + ' commented on [';
+    s += data.issue.pull_request ? 'pull request' : 'issue';
+    s += ' #';
     s += data.issue.number;
+    s += '](' + data.comment.html_url + ')';
+
     s += ' (' + data.issue.title + '): ';
 
     s += ellipsize(data.comment.body, 120);
-
-    console.log(s);
-    console.log(data.comment.html_url);
 
     sendTg(s);
 });
