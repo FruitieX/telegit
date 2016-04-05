@@ -5,5 +5,6 @@ module.exports = {
     },
 
     telegram: {
+        token: 'your-telegram-bot-api-token'
     }
 };

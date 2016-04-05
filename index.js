@@ -3,6 +3,7 @@ var ellipsize = require('ellipsize');
 var Telegram = require('node-telegram-bot-api');
 var path = require('path');
 var os = require('os');
+var fs = require('fs');
 
 var configPath = path.join(os.homedir(), '.telegit', 'config.js')
 try {
@@ -17,9 +18,60 @@ try {
     process.exit(1);
 }
 
+var START_STR = 'Ok, I will be sending you updates from the following GitHub repo: ';
+START_STR += config.git.reponame;
+
+var STOP_STR = 'Ok, I will no longer be sending you GitHub updates.';
+
 var github = githubhook(config.git);
 
-github.listen();
+var tg = new Telegram(config.telegram.token, {polling: true});
+
+var tgChats = [];
+
+var chatsPath = path.join(os.homedir(), '.telegit', 'chats.json')
+try {
+    console.log('Attempting to restore group chat IDs from ' + chatsPath + '...');
+    tgChats = require(chatsPath);
+    console.log('Successfully restored group chat IDs.');
+} catch (e) {
+    console.log('Error while reading from ' + chatsPath + ':');
+    console.log(e);
+
+    console.log('\nNot restoring group chat IDs. You MUST greet the bot with the /gitstart');
+    console.log('command in each group chat where you want it to send any github events.');
+}
+
+var writeTgChats = function() {
+    fs.writeFileSync(chatsPath, JSON.stringify(tgChats));
+};
+
+tg.on('message', function(msg) {
+    var chatId = msg.chat.id;
+    if (msg.text === '/gitstart') {
+        if (tgChats.indexOf(chatId) === -1) {
+            tgChats.push(chatId);
+            writeTgChats();
+            tg.sendMessage(chatId, START_STR);
+        }
+    } else if (msg.text === '/gitstop') {
+        var chatIndex = tgChats.indexOf(chatId);
+        if (chatIndex !== -1) {
+            tgChats.splice(chatIndex, 1);
+            writeTgChats();
+            tg.sendMessage(chatId, STOP_STR);
+        }
+    }
+});
+
+var sendTg = function(msg) {
+    tgChats.forEach(function(chatId) {
+        tg.sendMessage(chatId, msg, {
+            disable_web_page_preview: true,
+            parse_mode: 'Markdown'
+        });
+    });
+};
 
 github.on('push:' + config.git.reponame, function(ref, data) {
     // don't care about branch deletes
@@ -27,7 +79,7 @@ github.on('push:' + config.git.reponame, function(ref, data) {
         return;
     }
 
-    var s = data.after.substr(0, 8);
+    var s = '[' + data.after.substr(0, 8) + '](' + data.compare + ')';
 
     s += ': ' + data.pusher.name + ', (' + data.pusher.email + ')';
     s += ' pushed ' + data.commits.length;
@@ -39,6 +91,8 @@ github.on('push:' + config.git.reponame, function(ref, data) {
 
     console.log(s);
     console.log('url: ' + data.compare);
+
+    sendTg(s);
 });
 
 github.on('pull_request:' + config.git.reponame, function(ref, data) {
@@ -54,6 +108,8 @@ github.on('pull_request:' + config.git.reponame, function(ref, data) {
 
     console.log(s);
     console.log('url: ' + data.pull_request.html_url);
+
+    sendTg(s);
 });
 
 github.on('issues:' + config.git.reponame, function(ref, data) {
@@ -73,6 +129,8 @@ github.on('issues:' + config.git.reponame, function(ref, data) {
 
     console.log(s);
     console.log('url: ' + data.issue.html_url);
+
+    sendTg(s);
 });
 
 github.on('issue_comment:' + config.git.reponame, function(ref, data) {
@@ -84,13 +142,8 @@ github.on('issue_comment:' + config.git.reponame, function(ref, data) {
 
     console.log(s);
     console.log(data.comment.html_url);
-});
-/*
-var tg = new Telegram(config.tgToken, {polling: true});
 
-tg.on('message', function(msg) {
-    console.log(msg);
+    sendTg(s);
 });
 
-tg.sendMessage(channel.tgChatId, msg);
-*/
+github.listen();
