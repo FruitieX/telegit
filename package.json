@@ -1,0 +1,29 @@
+{
+  "name": "telegit",
+  "version": "0.1.0",
+  "description": "GitHub web hooks for your Telegram groups",
+  "main": "tg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FruitieX/telegit.git"
+  },
+  "keywords": [
+    "telegram",
+    "github"
+  ],
+  "author": "FruitieX",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FruitieX/telegit/issues"
+  },
+  "homepage": "https://github.com/FruitieX/telegit#readme",
+  "dependencies": {
+    "ellipsize": "0.0.2",
+    "githubhook": "^1.5.1",
+    "node-telegram-bot-api": "^0.21.1"
+  }
+}
