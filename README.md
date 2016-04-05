@@ -13,6 +13,8 @@ GitHub web hooks for your Telegram groups
    2. Content type should be left as `application/json`
    3. Set up a secret so others can't send fake events to your bot. Note
       the secret down, you'll need it soon.
+   4. Remember to pick `Send me everything` or `Let me select individual events`
+      to choose which events you want to see on Telegram.
 5. Set up a Telegram bot with [BotFather](https://telegram.me/botfather),
    store the API token somewhere safe, you'll need it in the next step
 6. Edit the default config: `$EDITOR ~/.telegit/config.js`
