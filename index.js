@@ -42,7 +42,7 @@ var tg = new Telegram(config.telegram.token, {polling: true});
 
 var tgChats = [];
 
-var chatsPath = path.join(os.homedir(), '.telegit', 'chats.json')
+var chatsPath = configPath + '.chatIds.js';
 try {
     console.log('Attempting to restore group chat IDs from ' + chatsPath + '...');
     tgChats = require(chatsPath);
