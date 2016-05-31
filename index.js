@@ -83,8 +83,11 @@ tg.on('message', function(msg) {
 });
 
 var escapeMd = function(text) {
+    // make sure we're dealing with a string
+    text = text.toString();
+
     // Telegram Bot API supports *_[]()` markdown control characters
-    var specialChars = new RegExp('([\\\\`*_()\\[\\]]){1}', 'g');
+    var specialChars = new RegExp('([\\\\`*_\\[]){1}', 'g');
 
     return text.replace(specialChars, function(match) {
         return '\\' + match;
@@ -157,7 +160,7 @@ github.on('issues:' + config.git.reponame, function(ref, data) {
 
 github.on('issue_comment:' + config.git.reponame, function(ref, data) {
     var s = escapeMd(data.sender.login) + ' commented on [';
-    s += escapeMd(data.issue.pull_request) ? 'pull request' : 'issue';
+    s += data.issue.pull_request ? 'pull request' : 'issue';
     s += ' #';
     s += escapeMd(data.issue.number);
     s += '](' + escapeMd(data.comment.html_url) + ')';
