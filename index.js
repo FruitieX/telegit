@@ -61,13 +61,13 @@ var writeTgChats = function() {
 
 tg.on('message', function(msg) {
     var chatId = msg.chat.id;
-    if (msg.text === '/gitstart') {
+    if (!msg.text.indexOf('/gitstart')) {
         if (tgChats.indexOf(chatId) === -1) {
             tgChats.push(chatId);
             writeTgChats();
             tg.sendMessage(chatId, START_STR);
         }
-    } else if (msg.text === '/gitstop') {
+    } else if (!msg.text.indexOf('/gitstop')) {
         var chatIndex = tgChats.indexOf(chatId);
         if (chatIndex !== -1) {
             tgChats.splice(chatIndex, 1);
