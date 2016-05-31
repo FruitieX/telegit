@@ -1,11 +1,24 @@
 var githubhook = require('githubhook');
 var ellipsize = require('ellipsize');
 var Telegram = require('node-telegram-bot-api');
+var yargs = require('yargs');
+
+var argv = yargs
+.usage('Usage: $0 [options]')
+
+.alias('c', 'config')
+.describe('c', 'Use config from given path')
+
+.alias('h', 'help')
+.help()
+.strict()
+.argv;
+
 var path = require('path');
 var os = require('os');
 var fs = require('fs');
 
-var configPath = path.join(os.homedir(), '.telegit', 'config.js')
+var configPath = argv.c || path.join(os.homedir(), '.telegit', 'config.js')
 try {
     var config = require(configPath);
 } catch (e) {

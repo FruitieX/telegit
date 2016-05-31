@@ -24,6 +24,7 @@
   "dependencies": {
     "ellipsize": "0.0.2",
     "githubhook": "^1.5.1",
-    "node-telegram-bot-api": "^0.21.1"
+    "node-telegram-bot-api": "^0.21.1",
+    "yargs": "^4.7.1"
   }
 }
