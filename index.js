@@ -60,6 +60,11 @@ var writeTgChats = function() {
 };
 
 tg.on('message', function(msg) {
+    // ignore non message events
+    if (!msg.text) {
+        return;
+    }
+
     var chatId = msg.chat.id;
     if (!msg.text.indexOf('/gitstart')) {
         if (tgChats.indexOf(chatId) === -1) {
