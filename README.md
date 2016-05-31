@@ -16,9 +16,11 @@ GitHub web hooks for your Telegram groups
    4. Remember to pick `Send me everything` or `Let me select individual events`
       to choose which events you want to see on Telegram.
 5. Set up a Telegram bot with [BotFather](https://telegram.me/botfather),
-   store the API token somewhere safe, you'll need it in the next step
-6. Edit the default config: `$EDITOR ~/.telegit/config.js`
-7. `npm start`
-8. Now invite your bot to a group and greet it with `/gitstart`
+   store the API token somewhere safe, you'll need it soon
+6. Use BotFather's `/setcommands` command on your newly created bot. Paste the
+   contents of the [commands.txt](/commands.txt) file to BotFather.
+7. Edit the default config: `$EDITOR ~/.telegit/config.js`
+8. `npm start`
+9. Now invite your bot to a group and greet it with `/gitstart@botname`
 
-You can stop the bot from sending messages with `/gitstop`.
+You can stop the bot from sending messages with `/gitstop@botname`.
