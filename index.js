@@ -64,6 +64,15 @@ tg.on('message', function(msg) {
     }
 });
 
+var escapeMd = function(text) {
+    // Telegram Bot API supports *_[]()` markdown control characters
+    var specialChars = new RegExp('([\\\\`*_()\\[\\]]){1}', 'g');
+
+    return text.replace(specialChars, function(match) {
+        return '\\' + match;
+    });
+};
+
 var sendTg = function(msg) {
     console.log('Sending to Telegram: ' + msg);
 
@@ -81,14 +90,14 @@ github.on('push:' + config.git.reponame, function(ref, data) {
         return;
     }
 
-    var s = '[' + data.after.substr(0, 8) + '](' + data.compare + ')';
+    var s = '[' + escapeMd(data.after.substr(0, 8)) + '](' + escapeMd(data.compare) + ')';
 
-    s += ': ' + data.pusher.name + ', (' + data.pusher.email + ')';
+    s += ': ' + escapeMd(data.pusher.name) + ', (' + escapeMd(data.pusher.email) + ')';
     s += ' pushed ' + data.commits.length;
     s += ' ' + (data.commits.length === 1 ? 'commit' : 'commits') + ' to ' + ref;
 
     if (data.commits.length === 1) {
-        s += ': "' + data.commits[0].message + '"';
+        s += ': "' + escapeMd(data.commits[0].message) + '"';
     }
 
     sendTg(s);
@@ -97,13 +106,13 @@ github.on('push:' + config.git.reponame, function(ref, data) {
 github.on('pull_request:' + config.git.reponame, function(ref, data) {
     var s = '[Pull request #';
 
-    s += data.number;
-    s += '](' + data.pull_request.html_url + ')';
+    s += escapeMd(data.number);
+    s += '](' + escapeMd(data.pull_request.html_url) + ')';
 
-    s += ' (' + data.pull_request.title + ')';
+    s += ' (' + escapeMd(data.pull_request.title) + ')';
 
-    s += ' ' + data.action;
-    s += ' by ' + data.sender.login;
+    s += ' ' + escapeMd(data.action);
+    s += ' by ' + escapeMd(data.sender.login);
 
     sendTg(s);
 });
@@ -111,33 +120,33 @@ github.on('pull_request:' + config.git.reponame, function(ref, data) {
 github.on('issues:' + config.git.reponame, function(ref, data) {
     var s = '[Issue #';
 
-    s += data.issue.number;
-    s += '](' + data.issue.html_url + ')';
+    s += escapeMd(data.issue.number);
+    s += '](' + escapeMd(data.issue.html_url) + ')';
 
-    s += ' (' + data.issue.title + ')';
-    s += ' ' + data.action;
+    s += ' (' + escapeMd(data.issue.title) + ')';
+    s += ' ' + escapeMd(data.action);
 
     if (data.action === 'unassigned') {
-        s += ' from ' + data.assignee.login;
+        s += ' from ' + escapeMd(data.assignee.login);
     } else if (data.action === 'assigned') {
-        s += ' to ' + data.assignee.login;
+        s += ' to ' + escapeMd(data.assignee.login);
     }
 
-    s += ' by ' + data.sender.login;
+    s += ' by ' + escapeMd(data.sender.login);
 
     sendTg(s);
 });
 
 github.on('issue_comment:' + config.git.reponame, function(ref, data) {
-    var s = data.sender.login + ' commented on [';
-    s += data.issue.pull_request ? 'pull request' : 'issue';
+    var s = escapeMd(data.sender.login) + ' commented on [';
+    s += escapeMd(data.issue.pull_request) ? 'pull request' : 'issue';
     s += ' #';
-    s += data.issue.number;
-    s += '](' + data.comment.html_url + ')';
+    s += escapeMd(data.issue.number);
+    s += '](' + escapeMd(data.comment.html_url) + ')';
 
-    s += ' (' + data.issue.title + '): ';
+    s += ' (' + escapeMd(data.issue.title) + '): ';
 
-    s += ellipsize(data.comment.body, 120);
+    s += escapeMd(ellipsize(data.comment.body, 120));
 
     sendTg(s);
 });
