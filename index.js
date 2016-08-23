@@ -105,13 +105,31 @@ var sendTg = function(msg) {
     });
 };
 
-github.on('push:' + config.git.reponame, function(ref, data) {
+var isConfiguredRepo = function(repo) {
+    if (config.git.repos && config.git.repos.indexOf(repo) !== -1) {
+        return true;
+    }
+
+    if (config.git.reponame && config.git.reponame === repo) {
+        return true;
+    }
+
+    return false;
+}
+
+github.on('push', function(repo, ref, data) {
+    if (!isConfiguredRepo(repo)) {
+        return;
+    }
+
     // don't care about branch deletes
     if (!data.commits.length) {
         return;
     }
 
-    var s = '[' + escapeMd(data.after.substr(0, 8)) + '](' + escapeMd(data.compare) + ')';
+    var s = repo + ': ';
+
+    s += '[' + escapeMd(data.after.substr(0, 8)) + '](' + escapeMd(data.compare) + ')';
 
     s += ': ' + escapeMd(data.pusher.name) + ', (' + escapeMd(data.pusher.email) + ')';
     s += ' pushed ' + data.commits.length;
@@ -124,8 +142,14 @@ github.on('push:' + config.git.reponame, function(ref, data) {
     sendTg(s);
 });
 
-github.on('pull_request:' + config.git.reponame, function(ref, data) {
-    var s = '[Pull request #';
+github.on('pull_request', function(repo, ref, data) {
+    if (!isConfiguredRepo(repo)) {
+        return;
+    }
+
+    var s = repo + ': ';
+
+    s += '[Pull request #';
 
     s += escapeMd(data.number);
     s += '](' + escapeMd(data.pull_request.html_url) + ')';
@@ -138,8 +162,14 @@ github.on('pull_request:' + config.git.reponame, function(ref, data) {
     sendTg(s);
 });
 
-github.on('issues:' + config.git.reponame, function(ref, data) {
-    var s = '[Issue #';
+github.on('issues', function(repo, ref, data) {
+    if (!isConfiguredRepo(repo)) {
+        return;
+    }
+
+    var s = repo + ': ';
+
+    s += '[Issue #';
 
     s += escapeMd(data.issue.number);
     s += '](' + escapeMd(data.issue.html_url) + ')';
@@ -158,8 +188,14 @@ github.on('issues:' + config.git.reponame, function(ref, data) {
     sendTg(s);
 });
 
-github.on('issue_comment:' + config.git.reponame, function(ref, data) {
-    var s = escapeMd(data.sender.login) + ' commented on [';
+github.on('issue_comment', function(repo, ref, data) {
+    if (!isConfiguredRepo(repo)) {
+        return;
+    }
+
+    var s = repo + ': ';
+
+    s += escapeMd(data.sender.login) + ' commented on [';
     s += data.issue.pull_request ? 'pull request' : 'issue';
     s += ' #';
     s += escapeMd(data.issue.number);
